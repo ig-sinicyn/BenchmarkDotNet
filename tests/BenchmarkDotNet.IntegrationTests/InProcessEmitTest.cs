@@ -60,7 +60,7 @@ namespace BenchmarkDotNet.IntegrationTests
                     .With(new RoslynToolchain())
                     .WithInvocationCount(4)
                     .WithUnrollFactor(4));
-            config.With(ConfigOptions.KeepBenchmarkFiles);
+            config.Options |= ConfigOptions.KeepBenchmarkFiles;
             config.Add(logger ?? (Output != null ? new OutputLogger(Output) : ConsoleLogger.Default));
 
             return config;
