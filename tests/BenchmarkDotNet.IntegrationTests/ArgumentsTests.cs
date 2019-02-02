@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
@@ -11,6 +12,7 @@ using BenchmarkDotNet.Tests.XUnit;
 using BenchmarkDotNet.Toolchains;
 using BenchmarkDotNet.Toolchains.CoreRt;
 using BenchmarkDotNet.Toolchains.InProcess.Emit;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -194,9 +196,9 @@ namespace BenchmarkDotNet.IntegrationTests
                     throw new ArgumentNullException(nameof(array));
 
                 for (int i = 0; i < 10; i++)
-                for (int j = 0; j < i; j++)
-                    if (array[i][j] != i)
-                        throw new ArgumentException("Invalid value");
+                    for (int j = 0; j < i; j++)
+                        if (array[i][j] != i)
+                            throw new ArgumentException("Invalid value");
             }
 
             public IEnumerable<object> CreateMatrix()
@@ -515,6 +517,27 @@ namespace BenchmarkDotNet.IntegrationTests
 
                 if (expected != passed)
                     throw new ArgumentException("The DateTime has wrong value!");
+            }
+        }
+
+        [Theory, MemberData(nameof(GetToolchains))]
+        public void CustomTypeThatAlsoExistsInTheSystemNamespaceAsArgument(IToolchain toolchain) => CanExecute<CustomTypeThatAlsoExistsInTheSystemNamespace>(toolchain);
+
+        public class CustomTypeThatAlsoExistsInTheSystemNamespace
+        {
+            public enum Action
+            {
+                It, Is, A, Duplicate, Of, System, Dot, Action
+            }
+
+            [Benchmark]
+            [Arguments(Action.System)]
+            public void Test(Action passed)
+            {
+                Action expected = Action.System;
+
+                if (expected != passed)
+                    throw new ArgumentException("The passed enum has wrong value!");
             }
         }
 
