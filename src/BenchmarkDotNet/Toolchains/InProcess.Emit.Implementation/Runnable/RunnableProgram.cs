@@ -14,7 +14,6 @@ namespace BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation
             BenchmarkId benchmarkId,
             Assembly partitionAssembly,
             BenchmarkCase benchmarkCase,
-            IConfig config,
             IHost host)
         {
             // the first thing to do is to let diagnosers hook in before anything happens
@@ -29,7 +28,7 @@ namespace BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation
 
                 var runCallback = GetRunCallback(benchmarkId, partitionAssembly);
 
-                runCallback.Invoke(null, new object[] { benchmarkCase, config, host });
+                runCallback.Invoke(null, new object[] { benchmarkCase, host });
                 return 0;
             }
             catch (Exception oom) when (

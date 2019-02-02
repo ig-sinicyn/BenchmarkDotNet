@@ -1,10 +1,13 @@
 ﻿using System.Linq;
+
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Environments;
+using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Validators;
+
 using static BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation.RunnableConstants;
 using static BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation.RunnableReflectionHelpers;
 
@@ -15,7 +18,6 @@ namespace BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation
         public static (Job, EngineParameters, IEngineFactory) PrepareForRun<T>(
             T instance,
             BenchmarkCase benchmarkCase,
-            IConfig config,
             IHost host)
         {
             FillObjectMembers(instance, benchmarkCase);
@@ -29,7 +31,7 @@ namespace BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation
             if (ValidationErrorReporter.ReportIfAny(errors, host))
                 return (null, null, null);
 
-            var engineParameters = CreateEngineParameters(instance, benchmarkCase, config, host);
+            var engineParameters = CreateEngineParameters(instance, benchmarkCase, host);
             var engineFactory = GetEngineFactory(benchmarkCase);
 
             return (job, engineParameters, engineFactory);
@@ -84,7 +86,6 @@ namespace BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation
         private static EngineParameters CreateEngineParameters<T>(
             T instance,
             BenchmarkCase benchmarkCase,
-            IConfig config,
             IHost host)
         {
             var engineParameters = new EngineParameters
@@ -103,8 +104,9 @@ namespace BenchmarkDotNet.Toolchains.InProcess.Emit.Implementation
                 IterationCleanupAction = CallbackFromField(instance, IterationSetupActionFieldName),
                 TargetJob = benchmarkCase.Job,
                 OperationsPerInvoke = benchmarkCase.Descriptor.OperationsPerInvoke,
-                MeasureGcStats = config.HasMemoryDiagnoser(),
-                Encoding = config.Encoding
+                MeasureGcStats = benchmarkCase.Config.HasMemoryDiagnoser(),
+                Encoding = benchmarkCase.Config.Encoding,
+                BenchmarkName = FullNameProvider.GetBenchmarkName(benchmarkCase)
             };
             return engineParameters;
         }

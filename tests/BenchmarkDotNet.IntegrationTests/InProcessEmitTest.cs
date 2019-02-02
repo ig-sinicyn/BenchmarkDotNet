@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
@@ -14,7 +15,9 @@ using BenchmarkDotNet.Tests.Loggers;
 using BenchmarkDotNet.Tests.XUnit;
 using BenchmarkDotNet.Toolchains.InProcess.Emit;
 using BenchmarkDotNet.Toolchains.Roslyn;
+
 using JetBrains.Annotations;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -34,7 +37,8 @@ namespace BenchmarkDotNet.IntegrationTests
             return new ManualConfig()
                 .With(Job.Dry.With(new InProcessEmitToolchain(TimeSpan.Zero, true)).WithInvocationCount(UnrollFactor).WithUnrollFactor(UnrollFactor))
                 .With(logger ?? (Output != null ? new OutputLogger(Output) : ConsoleLogger.Default))
-                .With(DefaultColumnProviders.Instance);
+                .With(DefaultColumnProviders.Instance)
+                .With(ConfigOptions.DisableOptimizationsValidator);
         }
 
         private IConfig CreateInProcessOrRoslynConfig(OutputLogger logger = null, IDiagnoser diagnoser = null)
@@ -56,7 +60,7 @@ namespace BenchmarkDotNet.IntegrationTests
                     .With(new RoslynToolchain())
                     .WithInvocationCount(4)
                     .WithUnrollFactor(4));
-            config.KeepBenchmarkFiles = true;
+            config.With(ConfigOptions.KeepBenchmarkFiles);
             config.Add(logger ?? (Output != null ? new OutputLogger(Output) : ConsoleLogger.Default));
 
             return config;
@@ -76,7 +80,7 @@ namespace BenchmarkDotNet.IntegrationTests
                     .With(new RoslynToolchain())
                     .WithInvocationCount(4)
                     .WithUnrollFactor(4));
-            config.KeepBenchmarkFiles = true;
+            config.With(ConfigOptions.KeepBenchmarkFiles);
             config.Add(logger ?? (Output != null ? new OutputLogger(Output) : ConsoleLogger.Default));
 
             return config;
